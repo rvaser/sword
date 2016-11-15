@@ -9,7 +9,7 @@ SWORD (Smith Waterman On Reduced Database) is a fast and sensitive software for 
 Application uses following software:
 
 1. SSE4.1 or higher
-2. gcc 4.*+
+2. gcc 4.8+
 
 ## INSTALLATION
 
@@ -39,3 +39,11 @@ For the complete list of parameters and their descriptions run the following com
 To remove SWORD executable, run:
 
     make clean
+
+## Contact information
+
+For additional information, help and bug reports please send an email to: robert.vaser@fer.hr.
+
+## Acknowledgement
+
+This work has been supported in part by Croatian Science Foundation under the project UIP-11-2013-7353.
