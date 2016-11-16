@@ -267,6 +267,7 @@ void help() {
     "        number of target sequences (per query sequence) passed\n"
     "        to the alignment part\n"
     "    -T, --threshold <int>\n"
+    "        default: 13\n"
     "        minimum score for two kmers to trigger a hit\n"
     "        if 0 given, only exact matching kmers are checked\n"
     "    -t, --threads <int>\n"
