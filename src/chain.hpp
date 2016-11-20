@@ -51,6 +51,8 @@ public:
         return data_.size();
     }
 
+    void change_protein_to_dna_codes();
+
     friend std::unique_ptr<Chain> createChain(uint32_t id, char* name,
         uint32_t name_length, char* data, uint32_t data_length);
 

@@ -16,9 +16,6 @@
 constexpr size_t kDatabasePartSize = 1000000000; /* ~1 GB */
 constexpr uint32_t kMaxShortChainLength = 2000;
 
-constexpr uint32_t kProtBits = 5;
-std::vector<uint32_t> kKmerDelMask = { 0, 0, 0, 0x7FFF, 0xFFFFF, 0x1FFFFFF };
-
 /* ************************************************************************** */
 /* ChainEntry - used to store additional data of Chain objects */
 
@@ -128,6 +125,12 @@ void preprocDatabase(std::vector<uint32_t>& dst, ChainSet& database,
 
 using MutexPtr = std::unique_ptr<std::mutex>;
 
+void transformChain(uint32_t id, uint32_t offset, ChainSet& chains) {
+    for (uint32_t i = id; i < std::min(id + offset, (uint32_t) chains.size()); ++i) {
+        chains[i]->change_protein_to_dna_codes();
+    }
+}
+
 void scoreChains(ChainEntrySet& dst, std::vector<MutexPtr>& entry_mutexes,
     size_t max_candidates, const ChainSet& queries, const ChainSet& database,
     uint32_t database_start, uint32_t database_end, std::shared_ptr<Kmers> kmers) {
@@ -137,8 +140,8 @@ void scoreChains(ChainEntrySet& dst, std::vector<MutexPtr>& entry_mutexes,
 
     ChainEntrySet entries_part(queries.size());
 
-    std::unique_ptr<uint16_t[]> min_entry_score(new uint16_t[queries.size()]);
-    std::unique_ptr<uint16_t[]> entries_found(new uint16_t[queries.size()]);
+    std::unique_ptr<uint32_t[]> min_entry_score(new uint32_t[queries.size()]);
+    std::unique_ptr<uint32_t[]> entries_found(new uint32_t[queries.size()]);
 
     {
         for (uint32_t i = 0; i < queries.size(); ++i) {
@@ -154,14 +157,15 @@ void scoreChains(ChainEntrySet& dst, std::vector<MutexPtr>& entry_mutexes,
     size_t groups = 0;
 
     uint32_t kmer_offset = kmer_length - 1;
-    uint32_t del_mask = kKmerDelMask[kmer_length];
+    uint32_t del_mask = kmers->mode() == 0 ? kProtDelMask[kmer_length] : kNuclDelMask[kmer_length];
+    uint32_t bit_length = kmers->mode() == 0 ? kProtBitLength : kNuclBitLength;
 
     uint32_t max_scores_length = kmer_length == 3 ? 100000 : 500000;
-    std::unique_ptr<uint16_t[]> scores(new uint16_t[max_scores_length]());
+    std::vector<uint32_t> scores(max_scores_length, 0);
     std::unique_ptr<uint32_t[]> score_lengths(new uint32_t[queries.size()]);
     std::unique_ptr<uint32_t[]> score_starts(new uint32_t[queries.size()+1]);
     score_starts[0] = 0;
-    std::unique_ptr<uint16_t[]> max_score(new uint16_t[queries.size()]());
+    std::unique_ptr<uint32_t[]> max_score(new uint32_t[queries.size()]());
 
     uint32_t min_score = kmer_length == 3 ? 1 : 0;
 
@@ -185,6 +189,10 @@ void scoreChains(ChainEntrySet& dst, std::vector<MutexPtr>& entry_mutexes,
             ++group_length;
         }
 
+        if (scores.size() < scores_length) {
+            scores.resize(scores_length, 0);
+        }
+
         auto hash = createHash(queries, i, group_length, kmers);
         Hash::Iterator begin, end;
 
@@ -199,12 +207,12 @@ void scoreChains(ChainEntrySet& dst, std::vector<MutexPtr>& entry_mutexes,
             const auto& sequence = database[j]->data();
             uint32_t kmer = sequence[0];
             for (uint32_t k = 1; k < kmer_offset; ++k) {
-                kmer = (kmer << kProtBits) | sequence[k];
+                kmer = (kmer << bit_length) | sequence[k];
             }
 
             uint32_t max_diag_id = database[j]->length() - kmer_length;
             for (uint32_t k = kmer_offset; k < sequence.size(); ++k) {
-                kmer = ((kmer << kProtBits) | sequence[k]) & del_mask;
+                kmer = ((kmer << bit_length) | sequence[k]) & del_mask;
                 hash->hits(begin, end, kmer);
                 for (; begin != end; ++begin) {
                     auto diagonal = max_diag_id + kmer_offset - k +
@@ -277,16 +285,28 @@ void scoreChains(ChainEntrySet& dst, std::vector<MutexPtr>& entry_mutexes,
 }
 
 uint64_t searchDatabase(Indexes& dst, const std::string& database_path,
-    const std::string& queries_path, uint32_t kmer_length, uint32_t max_candidates,
-    std::shared_ptr<ScoreMatrix> score_matrix, uint32_t score_threshold,
-    std::shared_ptr<thread_pool::ThreadPool> thread_pool) {
+    const std::string& queries_path, uint32_t mode, uint32_t kmer_length,
+    uint32_t max_candidates, std::shared_ptr<ScoreMatrix> score_matrix,
+    uint32_t score_threshold, std::shared_ptr<thread_pool::ThreadPool> thread_pool) {
 
     ChainSet queries;
     createChainSet(queries, queries_path);
 
+    if (mode != 0) {
+        uint32_t offset = 25;
+        std::vector<std::future<void>> thread_futures;
+        for (uint32_t i = 0; i < queries.size(); i += offset) {
+            thread_futures.emplace_back(thread_pool->submit_task(transformChain,
+                i, offset, std::ref(queries)));
+        }
+        for (const auto& it: thread_futures) {
+            it.wait();
+        }
+    }
+
     sort(queries.begin(), queries.end(), compareChainByLengthAsc);
 
-    std::shared_ptr<Kmers> kmers = createKmers(kmer_length, score_threshold,
+    std::shared_ptr<Kmers> kmers = createKmers(mode, kmer_length, score_threshold,
         score_matrix);
 
     uint64_t database_cells = 0;
@@ -303,6 +323,18 @@ uint64_t searchDatabase(Indexes& dst, const std::string& database_path,
 
         ChainSet database_part;
         auto status = createChainSetPart(database_part, reader, kDatabasePartSize);
+
+        if (mode != 0) {
+            uint32_t offset = 2500;
+            std::vector<std::future<void>> thread_futures;
+            for (uint32_t i = 0; i < database_part.size(); i += offset) {
+                thread_futures.emplace_back(thread_pool->submit_task(transformChain,
+                    i, offset, std::ref(database_part)));
+            }
+            for (const auto& it: thread_futures) {
+                it.wait();
+            }
+        }
 
         std::vector<uint32_t> tasks;
         preprocDatabase(tasks, database_part, thread_pool->num_threads());

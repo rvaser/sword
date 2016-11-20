@@ -88,3 +88,28 @@ bool createChainSetPart(ChainSet& dst, std::shared_ptr<Reader> reader, size_t ma
 Chain::Chain(uint32_t id, std::string&& name, std::string&& data)
         : id_(id), name_(name), data_(data) {
 }
+
+void Chain::change_protein_to_dna_codes() {
+
+    for (uint32_t i = 0; i < data_.size(); ++i) {
+        switch (data_[i]) {
+            case 0:
+                break;
+            case 2:
+                data_[i] = 1;
+                break;
+            case 6:
+                data_[i] = 2;
+                break;
+            case 19:
+                data_[i] = 3;
+                break;
+            case 20:
+                data_[i] = 3;
+                break;
+            default:
+                assert(false && "not valid dna");
+                break;
+        }
+    }
+}

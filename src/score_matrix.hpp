@@ -21,7 +21,8 @@ enum class ScoreMatrixType {
     kBlosum90,
     kPam30,
     kPam70,
-    kPam250
+    kPam250,
+    kEdna
 };
 
 std::unique_ptr<ScoreMatrix> createScoreMatrix(ScoreMatrixType type, int32_t gap_open,

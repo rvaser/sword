@@ -24,6 +24,7 @@ static struct option options[] = {
     {"evalue", required_argument, 0, 'v'},
     {"max-aligns", required_argument, 0, 'a'},
     {"algorithm", required_argument, 0, 'A'},
+    {"mode", required_argument, 0, 'M'},
     {"kmer-length", required_argument, 0, 'k'},
     {"max-candidates", required_argument, 0, 'c'},
     {"threshold", required_argument, 0, 'T'},
@@ -44,8 +45,7 @@ int main(int argc, char* argv[]) {
 
     auto threads = std::thread::hardware_concurrency() / 2;
 
-    int32_t gap_open = 10;
-    int32_t gap_extend = 1;
+    int32_t mode = 0;
 
     std::string queries_path;
     std::string database_path;
@@ -54,6 +54,9 @@ int main(int argc, char* argv[]) {
 
     std::string output_path;
     OutputType output_format = OutputType::kBm9;
+
+    int32_t gap_open = 10;
+    int32_t gap_extend = 1;
 
     double max_evalue = 10;
     int32_t max_alignments = 10;
@@ -66,7 +69,7 @@ int main(int argc, char* argv[]) {
 
     while (true) {
 
-        auto argument = getopt_long(argc, argv, "i:j:g:e:m:o:f:v:a:A:k:c:T:t:h",
+        auto argument = getopt_long(argc, argv, "i:j:g:e:m:o:f:v:a:A:M:k:c:T:t:h",
             options, nullptr);
 
         if (argument == -1) {
@@ -104,6 +107,9 @@ int main(int argc, char* argv[]) {
         case 'A':
             algorithm = strToAlignmentType(optarg);
             break;
+        case 'M':
+            mode = atoi(optarg);
+            break;
         case 'k':
             kmer_length = atoi(optarg);
             break;
@@ -126,6 +132,10 @@ int main(int argc, char* argv[]) {
     assert(!queries_path.empty() && "missing option -i (queries file)");
     assert(!database_path.empty() && "missing option -j (database file)");
 
+    if (mode != 0 && scorer_type != ScoreMatrixType::kEdna) {
+        assert(false && "wrong matrix table");
+    }
+
     std::shared_ptr<thread_pool::ThreadPool> thread_pool = thread_pool::createThreadPool(threads);
 
     std::shared_ptr<ScoreMatrix> scorer = createScoreMatrix(scorer_type,
@@ -136,7 +146,7 @@ int main(int argc, char* argv[]) {
 
     Indexes indexes;
     auto database_cells = searchDatabase(indexes, database_path, queries_path,
-        kmer_length, max_candidates, scorer, threshold, thread_pool);
+        mode, kmer_length, max_candidates, scorer, threshold, thread_pool);
 
     timer.stop();
     timer.print("database", "search");
@@ -187,6 +197,8 @@ ScoreMatrixType strToScorerType(const std::string& str) {
         return ScoreMatrixType::kPam70;
     } else if (str.compare("PAM_250") == 0) {
         return ScoreMatrixType::kPam250;
+    } else if (str.compare("EDNA") == 0) {
+        return ScoreMatrixType::kEdna;
     }
 
     assert(false && "unrecognized scorer type");
@@ -236,6 +248,7 @@ void help() {
     "            PAM_30\n"
     "            PAM_70\n"
     "            PAM_250\n"
+    "            EDNA\n"
     "    -o, --out <string>\n"
     "        default: stdout\n"
     "        output file for the alignment\n"
@@ -259,10 +272,14 @@ void help() {
     "            NW - Needleman-Wunsch global alignment\n"
     "            HW - semiglobal alignment\n"
     "            OV - overlap alignment\n"
+    "    -M, --mode <int>\n"
+    "        default: 0\n"
+    "        defines protein vs protein mode (0) and dna vs dna mode (1)\n"
     "    -k, --kmer-length <int>\n"
     "        default: 3\n"
     "        length of kmers used for database search\n"
-    "        possible values: 3, 4, 5\n"
+    "        possible values for proteins: 3, 4, 5\n"
+    "        possible values for dna: 8, 9, 10, 11, 12, 13\n"
     "    -c, --max-candidates <int>\n"
     "        default: 30000\n"
     "        number of target sequences (per query sequence) passed\n"
@@ -271,6 +288,7 @@ void help() {
     "        default: 13\n"
     "        minimum score for two kmers to trigger a hit\n"
     "        if 0 given, only exact matching kmers are checked\n"
+    "        (this option is disabled for dna vs dna mode)\n"
     "    -t, --threads <int>\n"
     "        default: hardware concurrency / 2\n"
     "        number of threads used in thread pool\n"
