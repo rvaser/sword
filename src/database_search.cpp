@@ -160,7 +160,7 @@ void scoreChains(ChainEntrySet& dst, std::vector<MutexPtr>& entry_mutexes,
     uint32_t max_scores_length = kmer_length == 3 ? 100000 : 500000;
     std::unique_ptr<uint16_t[]> scores(new uint16_t[max_scores_length]());
     std::unique_ptr<uint32_t[]> score_lengths(new uint32_t[queries.size()]);
-    std::unique_ptr<uint32_t[]> score_starts(new uint32_t[queries.size()]);
+    std::unique_ptr<uint32_t[]> score_starts(new uint32_t[queries.size()+1]);
     score_starts[0] = 0;
     std::unique_ptr<uint16_t[]> max_score(new uint16_t[queries.size()]());
 
