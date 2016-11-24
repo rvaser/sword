@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
     assert(!queries_path.empty() && "missing option -i (queries file)");
     assert(!database_path.empty() && "missing option -j (database file)");
 
-    if (mode == 0) {
+    if (mode == 1) {
         scorer_type = ScoreMatrixType::kEdna;
     }
 
