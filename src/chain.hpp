@@ -51,6 +51,10 @@ public:
         return data_.size();
     }
 
+    const std::vector<std::pair<uint32_t, uint32_t>>& valid_regions() {
+        return valid_regions_;
+    }
+
     void change_protein_to_dna_codes();
 
     friend std::unique_ptr<Chain> createChain(uint32_t id, char* name,
@@ -65,4 +69,6 @@ private:
     uint32_t id_;
     std::string name_;
     std::string data_;
+    std::vector<std::pair<uint32_t, uint32_t>> valid_regions_;
+    bool is_dna_;
 };

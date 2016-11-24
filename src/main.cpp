@@ -132,8 +132,8 @@ int main(int argc, char* argv[]) {
     assert(!queries_path.empty() && "missing option -i (queries file)");
     assert(!database_path.empty() && "missing option -j (database file)");
 
-    if (mode != 0 && scorer_type != ScoreMatrixType::kEdna) {
-        assert(false && "wrong matrix table");
+    if (mode == 0) {
+        scorer_type = ScoreMatrixType::kEdna;
     }
 
     std::shared_ptr<thread_pool::ThreadPool> thread_pool = thread_pool::createThreadPool(threads);
@@ -238,7 +238,7 @@ void help() {
     "        gap extension penalty, must be given as a positive integer and\n"
     "        must be less or equal to gap opening penalty\n"
     "    -m, --matrix <string>\n"
-    "        default: BLOSUM_62\n"
+    "        default: BLOSUM_62 (EDNA for DNA vs DNA search)\n"
     "        similarity matrix, can be one of the following:\n"
     "            BLOSUM_45\n"
     "            BLOSUM_50\n"

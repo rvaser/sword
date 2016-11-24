@@ -205,21 +205,26 @@ void scoreChains(ChainEntrySet& dst, std::vector<MutexPtr>& entry_mutexes,
             }
 
             const auto& sequence = database[j]->data();
-            uint32_t kmer = sequence[0];
-            for (uint32_t k = 1; k < kmer_offset; ++k) {
-                kmer = (kmer << bit_length) | sequence[k];
-            }
-
             uint32_t max_diag_id = database[j]->length() - kmer_length;
-            for (uint32_t k = kmer_offset; k < sequence.size(); ++k) {
-                kmer = ((kmer << bit_length) | sequence[k]) & del_mask;
-                hash->hits(begin, end, kmer);
-                for (; begin != end; ++begin) {
-                    auto diagonal = max_diag_id + kmer_offset - k +
-                        begin->position() + score_starts[begin->id()];
-                    ++scores[diagonal];
-                    if (max_score[begin->id()] < scores[diagonal]) {
-                        max_score[begin->id()] = scores[diagonal];
+            for (const auto& it: database[j]->valid_regions()) {
+
+                uint32_t kmer = 0;
+                for (uint32_t k = it.first; k < it.second; ++k) {
+
+                    kmer = ((kmer << bit_length) | sequence[k]) & del_mask;
+                    if (k - it.first >= kmer_offset) {
+
+                        hash->hits(begin, end, kmer);
+                        for (; begin != end; ++begin) {
+
+                            auto diagonal = max_diag_id + kmer_offset - k +
+                                begin->position() + score_starts[begin->id()];
+                            ++scores[diagonal];
+
+                            if (max_score[begin->id()] < scores[diagonal]) {
+                                max_score[begin->id()] = scores[diagonal];
+                            }
+                        }
                     }
                 }
             }

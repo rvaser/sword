@@ -30,31 +30,30 @@ static void createKmersRecursive(std::vector<std::string>& kmers,
     }
 }
 
-std::vector<uint32_t> createKmerVector(const std::unique_ptr<Chain>& chain,
+std::vector<std::pair<uint32_t, uint32_t>> createKmerVector(const std::unique_ptr<Chain>& chain,
     uint32_t mode, uint32_t kmer_length) {
 
     if (chain->length() < kmer_length) {
-        return std::vector<uint32_t>();
+        return std::vector<std::pair<uint32_t, uint32_t>>();
     }
 
     auto data = chain->data();
 
-    std::vector<uint32_t> res(data.size() - kmer_length + 1);
-    uint32_t ptr = 0, kmer = 0;
+    std::vector<std::pair<uint32_t, uint32_t>> dst;
     uint32_t del_mask = mode == 0 ? kProtDelMask[kmer_length] : kNuclDelMask[kmer_length];
     uint32_t bit_length = mode == 0 ? kProtBitLength : kNuclBitLength;
 
-    for (uint32_t i = 0; i < kmer_length; ++i) {
-        kmer = (kmer << bit_length) | data[i];
+    for (const auto& it: chain->valid_regions()) {
+        uint32_t kmer = 0;
+        for (uint32_t i = it.first; i < it.second; ++i) {
+            kmer = ((kmer << bit_length) | data[i]) & del_mask;
+            if (i - it.first >= kmer_length - 1) {
+                dst.emplace_back(i - kmer_length + 1, kmer);
+            }
+        }
     }
-    res[ptr++] = kmer;
 
-    for (uint32_t i = kmer_length; i < data.size(); ++i) {
-        kmer = ((kmer << bit_length) | data[i]) & del_mask;
-        res[ptr++] = kmer;
-    }
-
-    return res;
+    return dst;
 }
 
 std::unique_ptr<Kmers> createKmers(uint32_t mode, uint32_t kmer_length,

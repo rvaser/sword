@@ -28,7 +28,7 @@ constexpr std::array<uint32_t, 14> kNuclDelMask = { 0, 0, 0, 0, 0, 0, 0, 0, 0xFF
 std::unique_ptr<Kmers> createKmers(uint32_t mode, uint32_t kmer_length,
     uint32_t score_threshold, std::shared_ptr<ScoreMatrix> score_matrix);
 
-std::vector<uint32_t> createKmerVector(const std::unique_ptr<Chain>& chain,
+std::vector<std::pair<uint32_t, uint32_t>> createKmerVector(const std::unique_ptr<Chain>& chain,
     uint32_t mode, uint32_t kmer_length);
 
 uint32_t transformNuclChar(uint32_t c);

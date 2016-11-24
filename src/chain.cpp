@@ -86,30 +86,61 @@ bool createChainSetPart(ChainSet& dst, std::shared_ptr<Reader> reader, size_t ma
 }
 
 Chain::Chain(uint32_t id, std::string&& name, std::string&& data)
-        : id_(id), name_(name), data_(data) {
+        : id_(id), name_(name), data_(data), valid_regions_(), is_dna_(false) {
+
+    valid_regions_.emplace_back(0, data.size());
 }
 
 void Chain::change_protein_to_dna_codes() {
 
+    if (is_dna_ == true) {
+        return;
+    }
+    is_dna_ = true;
+
+    valid_regions_.clear();
+
+    bool is_n_region = false;
+    uint32_t begin = 0;
+    if (data_[0] == 13) {
+        is_n_region = true;
+    }
+
     for (uint32_t i = 0; i < data_.size(); ++i) {
-        switch (data_[i]) {
-            case 0:
-                break;
-            case 2:
-                data_[i] = 1;
-                break;
-            case 6:
-                data_[i] = 2;
-                break;
-            case 19:
-                data_[i] = 3;
-                break;
-            case 20:
-                data_[i] = 3;
-                break;
-            default:
-                assert(false && "not valid dna");
-                break;
+        if (data_[i] != 0 && data_[i] != 2 && data_[i] != 6 && data_[i] != 19 && data_[i] != 20) {
+            data_[i] = 13; // replace everything ambiguous to N for database search
+            if (is_n_region == false) {
+                is_n_region = true;
+                valid_regions_.emplace_back(begin, i);
+            }
+        } else {
+            switch (data_[i]) {
+                case 0: // A
+                    break;
+                case 2: // C
+                    data_[i] = 1;
+                    break;
+                case 6: // G
+                    data_[i] = 2;
+                    break;
+                case 19: // T
+                    data_[i] = 3;
+                    break;
+                case 20: // U
+                    data_[i] = 3;
+                    break;
+                default:
+                    assert(false && "not valid dna");
+                    break;
+            }
+            if (is_n_region == true) {
+                is_n_region = false;
+                begin = i;
+            }
         }
+    }
+
+    if (data_.back() != 13) {
+        valid_regions_.emplace_back(begin, data_.size());
     }
 }

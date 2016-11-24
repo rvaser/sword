@@ -34,9 +34,9 @@ Hash::Hash(const ChainSet& chains, uint32_t start, uint32_t length,
         auto kmer_vector = createKmerVector(chains[i], kmers->mode(), kmers->kmer_length());
 
         for (uint32_t j = 0; j < kmer_vector.size(); ++j) {
-            ++starts_[kmer_vector[j] + 1];
-            if (kmers->mode() == 0 && kmers->has_permutations()) {
-                for (const auto& it: kmers->kmer_substitutions(kmer_vector[j])) {
+            ++starts_[kmer_vector[j].second + 1];
+            if (kmers->has_permutations()) {
+                for (const auto& it: kmers->kmer_substitutions(kmer_vector[j].second)) {
                     ++starts_[it + 1];
                 }
             }
@@ -56,10 +56,10 @@ Hash::Hash(const ChainSet& chains, uint32_t start, uint32_t length,
 
         for (uint32_t j = 0; j < kmer_vector.size(); ++j) {
 
-            auto hit = Hit(i - start, j);
-            hits_[tmp[kmer_vector[j]]++] = hit;
-            if (kmers->mode() == 0 && kmers->has_permutations()) {
-                for (const auto& it: kmers->kmer_substitutions(kmer_vector[j])) {
+            auto hit = Hit(i - start, kmer_vector[j].first);
+            hits_[tmp[kmer_vector[j].second]++] = hit;
+            if (kmers->has_permutations()) {
+                for (const auto& it: kmers->kmer_substitutions(kmer_vector[j].second)) {
                     hits_[tmp[it]++] = hit;
                 }
             }
