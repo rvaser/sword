@@ -7,14 +7,13 @@
 #include <assert.h>
 #include <algorithm>
 
-#include "../vendor/opal/src/opal.h"
+#include "opal/src/opal.h"
 
 #include "chain.hpp"
 #include "reader.hpp"
 #include "writer.hpp"
 #include "score_matrix.hpp"
 #include "evalue.hpp"
-#include "thread_pool.hpp"
 #include "database_alignment.hpp"
 
 constexpr size_t kDatabasePartSize = 1000000000; /* ~1 GB */
@@ -211,7 +210,7 @@ void alignDatabase(std::vector<AlignmentSet>& dst, AlignmentType algorithm_,
     Indexes& indexes, double max_evalue, std::shared_ptr<EValue> evalue_params,
     uint32_t max_alignments, std::shared_ptr<ScoreMatrix> scorer,
     const std::string& output_path, OutputType output_format,
-    std::shared_ptr<ThreadPool> thread_pool) {
+    std::shared_ptr<thread_pool::ThreadPool> thread_pool) {
 
     auto algorithm = alignmentTypeToOpalMode(algorithm_);
 

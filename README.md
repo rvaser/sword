@@ -15,18 +15,27 @@ Application uses following software:
 
 ### LINUX
 
-Makefile is provided in the project root folder. Inside SWORD root, run:
+To build SWORD run the following commands from your terminal:
 
+    git clone --recursive https://github.com/rvaser/sword.git sword
+    cd sword/
     make
 
 After running make, an executable named sword will appear in the current directory.
+
+#### Troubleshooting
+
+If you have cloned the repository without '--recursive', run the following commands before running 'make':
+
+    git submodule init
+    git submodule update
 
 The software should also run on MAC OS, but it was not tested in that environment.
 
 ## EXAMPLES
 
 All examples assume that make has been run and that SWORD was successfully compiled.
-Simplest protein fasta database search can be executed using the following command:
+Simplest protein FASTA database search can be executed using the following command:
 
     ./sword -i <query> -j <database>
 

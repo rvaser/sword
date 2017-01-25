@@ -17,7 +17,7 @@ CP_FLAGS = $(I_CMD) -O3 -Wall -std=c++11 -march=native
 LD_FLAGS = $(I_CMD) $(L_CMD) -pthread
 
 SRC = $(shell find $(SRC_DIR) -type f -regex ".*\.cpp")
-VND = $(VND_DIR)/opal/src/opal.cpp
+VND = $(VND_DIR)/opal/src/opal.cpp $(shell find $(VND_DIR)/thread_pool -type f -regex ".*\.cpp")
 OBJ = $(subst $(SRC_DIR), $(OBJ_DIR), $(addsuffix .o, $(basename $(SRC)))) $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(notdir $(VND)))))
 DEP = $(OBJ:.o=.d)
 EXC = $(NAME)
@@ -43,6 +43,11 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@$(CP) $< -c -o $@ -MMD $(CP_FLAGS)
 
 $(OBJ_DIR)/opal.o: $(VND_DIR)/opal/src/opal.cpp
+	@echo [CP] $<
+	@mkdir -p $(dir $@)
+	@$(CP) $< -c -o $@ -MMD $(CP_FLAGS)
+
+$(OBJ_DIR)/%.o: $(VND_DIR)/thread_pool/src/%.cpp
 	@echo [CP] $<
 	@mkdir -p $(dir $@)
 	@$(CP) $< -c -o $@ -MMD $(CP_FLAGS)

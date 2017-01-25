@@ -11,10 +11,11 @@
 #include <vector>
 #include <memory>
 
+#include "thread_pool/src/thread_pool.hpp"
+
 enum class OutputType;
 class ScoreMatrix;
 class EValue;
-class ThreadPool;
 class Alignment;
 
 enum class AlignmentType {
@@ -103,4 +104,4 @@ void alignDatabase(std::vector<AlignmentSet>& dst, AlignmentType algorithm,
     Indexes& indexes, double max_evalue, std::shared_ptr<EValue> evalue_params,
     uint32_t max_alignments, std::shared_ptr<ScoreMatrix> scorer,
     const std::string& output_path, OutputType output_format,
-    std::shared_ptr<ThreadPool> thread_pool);
+    std::shared_ptr<thread_pool::ThreadPool> thread_pool);

@@ -4,12 +4,13 @@
 #include <assert.h>
 #include <memory>
 
+#include "thread_pool/src/thread_pool.hpp"
+
 #include "writer.hpp"
 #include "evalue.hpp"
 #include "score_matrix.hpp"
 #include "database_search.hpp"
 #include "database_alignment.hpp"
-#include "thread_pool.hpp"
 #include "utils.hpp"
 
 static struct option options[] = {
@@ -125,7 +126,7 @@ int main(int argc, char* argv[]) {
     assert(!queries_path.empty() && "missing option -i (queries file)");
     assert(!database_path.empty() && "missing option -j (database file)");
 
-    std::shared_ptr<ThreadPool> thread_pool = createThreadPool(threads);
+    std::shared_ptr<thread_pool::ThreadPool> thread_pool = thread_pool::createThreadPool(threads);
 
     std::shared_ptr<ScoreMatrix> scorer = createScoreMatrix(scorer_type,
         gap_open, gap_extend);

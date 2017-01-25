@@ -1,3 +1,6 @@
 [submodule "vendor/opal"]
 	path = vendor/opal
 	url = https://github.com/martinsos/opal
+[submodule "vendor/thread_pool"]
+	path = vendor/thread_pool
+	url = https://github.com/rvaser/thread_pool

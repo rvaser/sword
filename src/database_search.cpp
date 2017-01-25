@@ -11,7 +11,6 @@
 #include "kmers.hpp"
 #include "hash.hpp"
 #include "utils.hpp"
-#include "thread_pool.hpp"
 #include "database_search.hpp"
 
 constexpr size_t kDatabasePartSize = 1000000000; /* ~1 GB */
@@ -280,7 +279,7 @@ void scoreChains(ChainEntrySet& dst, std::vector<MutexPtr>& entry_mutexes,
 uint64_t searchDatabase(Indexes& dst, const std::string& database_path,
     const std::string& queries_path, uint32_t kmer_length, uint32_t max_candidates,
     std::shared_ptr<ScoreMatrix> score_matrix, uint32_t score_threshold,
-    std::shared_ptr<ThreadPool> thread_pool) {
+    std::shared_ptr<thread_pool::ThreadPool> thread_pool) {
 
     ChainSet queries;
     createChainSet(queries, queries_path);
