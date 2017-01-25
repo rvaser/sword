@@ -10,23 +10,21 @@ VND_DIR = vendor
 DOC_DIR = doc
 EXC_DIR = bin
 
-I_CMD = $(addprefix -I, $(SRC_DIR))
-I_CMD_V = $(addprefix -I, $(VND_DIR))
+I_CMD = $(addprefix -I, $(SRC_DIR) $(VND_DIR))
 L_CMD = $(addprefix -L, )
 
-CP_FLAGS = $(I_CMD) $(I_CMD_V) -O3 -Wall -std=c++11 -march=native
-DEBUG_FLAGS = $(I_CMD) $(I_CMD_V) -g -Wall -std=c++11 -O0 -march=native
-# CP_FLAGS = $(DEBUG_FLAGS)
-LD_FLAGS = $(I_CMD) $(I_CMD_V) $(L_CMD) -pthread
+CP_FLAGS = $(I_CMD) -O3 -Wall -std=c++11 -march=native
+LD_FLAGS = $(I_CMD) $(L_CMD) -pthread
 
 SRC = $(shell find $(SRC_DIR) -type f -regex ".*\.cpp")
-VND = $(shell find $(VND_DIR) -type f -regex ".*\.cpp")
-OBJ = $(subst $(SRC_DIR), $(OBJ_DIR), $(addsuffix .o, $(basename $(SRC))))
-OBJ += $(subst $(VND_DIR), $(OBJ_DIR), $(addsuffix .o, $(basename $(VND))))
+VND = $(VND_DIR)/opal/src/opal.cpp
+OBJ = $(subst $(SRC_DIR), $(OBJ_DIR), $(addsuffix .o, $(basename $(SRC)))) $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(basename $(notdir $(VND)))))
 DEP = $(OBJ:.o=.d)
 EXC = $(NAME)
 BIN = $(EXC_DIR)/$(EXC)
 DOC = $(DOC_DIR)/DoxyFile
+
+print-%  : ; @echo $* = $($*)
 
 all: $(EXC)
 
@@ -44,7 +42,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@$(CP) $< -c -o $@ -MMD $(CP_FLAGS)
 
-$(OBJ_DIR)/%.o: $(VND_DIR)/%.cpp
+$(OBJ_DIR)/opal.o: $(VND_DIR)/opal/src/opal.cpp
 	@echo [CP] $<
 	@mkdir -p $(dir $@)
 	@$(CP) $< -c -o $@ -MMD $(CP_FLAGS)
