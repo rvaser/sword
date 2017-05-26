@@ -55,4 +55,5 @@ For additional information, help and bug reports please send an email to: robert
 
 ## Acknowledgement
 
-This work has been supported in part by Croatian Science Foundation under the project UIP-11-2013-7353.
+This work has been supported in part by Croatian Science Foundation under the project UIP-11-2013-7353 and in part
+by Croatian Academy of Sciences and Arts.
