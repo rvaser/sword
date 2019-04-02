@@ -35,4 +35,4 @@ endif()
 
 target_link_libraries(sword thread_pool pthread)
 
-install(TARGETS sword DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS sword DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -67,12 +67,10 @@ int main(int argc, char* argv[]) {
     uint32_t max_candidates = 30000;
     uint32_t threshold = 13;
 
-    while (true) {
+    char opt;
+    while ((opt = getopt_long(argc, argv, "i:j:g:e:m:o:f:v:a:A:k:c:T:t:h", options, nullptr)) != -1) {
 
-        auto argument = getopt_long(argc, argv, "i:j:g:e:m:o:f:v:a:A:k:c:T:t:h",
-            options, nullptr);
-
-        switch (argument) {
+        switch (opt) {
         case 'i':
             queries_path = optarg;
             break;
@@ -120,13 +118,18 @@ int main(int argc, char* argv[]) {
             return 0;
         case 'h':
         default:
-            help();
-            return -1;
+            return 1;
         }
     }
 
-    assert(!queries_path.empty() && "missing option -i (queries file)");
-    assert(!database_path.empty() && "missing option -j (database file)");
+    if (queries_path.empty()) {
+        fprintf(stderr, "[sword::] error: missing input queries file!\n");
+        return 1;
+    }
+    if (database_path.empty()) {
+        fprintf(stderr, "[sword::] error: missing input database file!\n");
+        return 1;
+    }
 
     std::shared_ptr<thread_pool::ThreadPool> thread_pool = thread_pool::createThreadPool(threads);
 
