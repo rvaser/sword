@@ -11,7 +11,7 @@
 #include <string>
 #include <memory>
 
-#include "thread_pool/src/thread_pool.hpp"
+#include "thread_pool/thread_pool.hpp"
 
 class ScoreMatrix;
 

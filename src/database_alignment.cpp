@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <algorithm>
 
-#include "opal/src/opal.h"
+#include "opal.h"
 
 #include "chain.hpp"
 #include "reader.hpp"

@@ -11,7 +11,7 @@
 #include <vector>
 #include <memory>
 
-#include "thread_pool/src/thread_pool.hpp"
+#include "thread_pool/thread_pool.hpp"
 
 enum class OutputType;
 class ScoreMatrix;

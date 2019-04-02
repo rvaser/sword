@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <memory>
 
-#include "thread_pool/src/thread_pool.hpp"
+#include "thread_pool/thread_pool.hpp"
 
 #include "writer.hpp"
 #include "evalue.hpp"
@@ -12,6 +12,8 @@
 #include "database_search.hpp"
 #include "database_alignment.hpp"
 #include "utils.hpp"
+
+static const char* version = "v1.0.0";
 
 static struct option options[] = {
     {"query", required_argument, 0, 'i'},
@@ -28,6 +30,7 @@ static struct option options[] = {
     {"max-candidates", required_argument, 0, 'c'},
     {"threshold", required_argument, 0, 'T'},
     {"threads", required_argument, 0, 't'},
+    {"version", no_argument, 0, 'V'},
     {"help", no_argument, 0, 'h'},
     {0, 0, 0, 0}
 };
@@ -68,10 +71,6 @@ int main(int argc, char* argv[]) {
 
         auto argument = getopt_long(argc, argv, "i:j:g:e:m:o:f:v:a:A:k:c:T:t:h",
             options, nullptr);
-
-        if (argument == -1) {
-            break;
-        }
 
         switch (argument) {
         case 'i':
@@ -116,6 +115,9 @@ int main(int argc, char* argv[]) {
         case 't':
             threads = atoi(optarg);
             break;
+        case 'V':
+            printf("%s\n", version);
+            return 0;
         case 'h':
         default:
             help();
@@ -274,6 +276,8 @@ void help() {
     "    -t, --threads <int>\n"
     "        default: hardware concurrency / 2\n"
     "        number of threads used in thread pool\n"
+    "    --version\n"
+    "        prints the version number\n"
     "    -h, -help\n"
     "        prints out the help\n");
 }
