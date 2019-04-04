@@ -126,10 +126,12 @@ int main(int argc, char* argv[]) {
 
     if (queries_path.empty()) {
         fprintf(stderr, "[sword::] error: missing input queries file!\n");
+        help();
         return 1;
     }
     if (database_path.empty()) {
         fprintf(stderr, "[sword::] error: missing input database file!\n");
+        help();
         return 1;
     }
 
