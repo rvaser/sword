@@ -283,6 +283,6 @@ void help() {
     "        number of threads used in thread pool\n"
     "    --version\n"
     "        prints the version number\n"
-    "    -h, -help\n"
+    "    -h, --help\n"
     "        prints out the help\n");
 }
