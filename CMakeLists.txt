@@ -11,7 +11,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -march=native")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
+find_package(Threads REQUIRED)
 
 add_executable(sword
     src/chain.cpp
@@ -33,6 +35,6 @@ if (NOT TARGET thread_pool)
     add_subdirectory(vendor/thread_pool EXCLUDE_FROM_ALL)
 endif()
 
-target_link_libraries(sword thread_pool pthread)
+target_link_libraries(sword thread_pool Threads::Threads)
 
 install(TARGETS sword DESTINATION ${CMAKE_INSTALL_BINDIR})
