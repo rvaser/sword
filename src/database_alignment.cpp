@@ -232,7 +232,7 @@ void alignDatabase(std::vector<AlignmentSet>& dst, AlignmentType algorithm_,
         std::vector<std::future<void>> thread_futures;
 
         for (uint32_t i = 0; i < queries.size(); ++i) {
-            thread_futures.emplace_back(thread_pool->submit_task(scoreChains,
+            thread_futures.emplace_back(thread_pool->submit(scoreChains,
                 std::ref(dst[i]), std::ref(queries[i]), std::ref(indexes[i]),
                 std::ref(database), database_start, algorithm, max_evalue,
                 evalue_params, max_alignments, scorer));
@@ -269,7 +269,7 @@ void alignDatabase(std::vector<AlignmentSet>& dst, AlignmentType algorithm_,
         std::vector<std::future<void>> thread_futures;
 
         for (uint32_t i = 0; i < queries.size(); ++i) {
-            thread_futures.emplace_back(thread_pool->submit_task(alignChains,
+            thread_futures.emplace_back(thread_pool->submit(alignChains,
                 std::ref(dst[i]), std::ref(queries[i]), std::ref(database),
                 algorithm, scorer));
         }

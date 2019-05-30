@@ -312,7 +312,7 @@ uint64_t searchDatabase(Indexes& dst, const std::string& database_path,
         std::vector<std::future<void>> thread_futures;
 
         for (uint32_t i = 0; i < tasks.size() - 1; ++i) {
-            thread_futures.emplace_back(thread_pool->submit_task(scoreChains,
+            thread_futures.emplace_back(thread_pool->submit(scoreChains,
                 std::ref(entries), std::ref(entry_mutexes), max_candidates,
                 std::ref(queries), std::ref(database_part), tasks[i],
                 tasks[i + 1], kmers));

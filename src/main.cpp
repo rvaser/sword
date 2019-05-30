@@ -13,7 +13,7 @@
 #include "database_alignment.hpp"
 #include "utils.hpp"
 
-static const char* version = "v1.0.2";
+static const char* version = "v1.0.3";
 
 static struct option options[] = {
     {"query", required_argument, 0, 'i'},
