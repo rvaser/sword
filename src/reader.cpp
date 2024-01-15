@@ -66,6 +66,10 @@ bool Reader::read_chains(ChainSet& dst, size_t max_bytes) {
                 bytes_over = 0;
                 is_name = true;
 
+                if (c != '>') {
+                    data[data_length++] = c;
+                }
+
                 dst.emplace_back(createChain(num_chains_read_++, name, name_length,
                     data, data_length));
 
